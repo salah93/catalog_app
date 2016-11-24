@@ -67,6 +67,18 @@ def logout():
     pass
 
 
+@app.route('/json/')
+def json_restaurants():
+    '''this view returns all restaurants in json view'''
+    pass
+
+
+@app.route('/json/<item: restaurant_id>')
+def json_items(restaurant_id):
+    '''this view returns all restaurants in json view'''
+    pass
+
+
 if __name__ == '__main__':
     app.debug = True
     app.run(port=8002)
