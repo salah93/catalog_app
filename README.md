@@ -9,7 +9,7 @@ $ cd restaurant_app
 $ pip install -U pip, virtualenv
 $ virtualenv ~/.virtualenvs/restaurant_app
 $ . ~/.virtualenvs/restaurant_app/bin/activate
-$ pip install requirements.txt
+$ pip install -r requirements.txt
 $ python app.py
 ```
 

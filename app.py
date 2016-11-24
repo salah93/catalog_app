@@ -2,7 +2,7 @@ from flask import Flask, render_template, redirect, url_for, request, jsonify
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from models import Restaurant, MenuItem, User, Like, engine
+from models import Restaurant, MenuItem, User, Like, engine, Base
 
 
 Base.metadata.bind = engine
@@ -19,7 +19,7 @@ def home():
 
 @app.route('/favorites', methods=['GET', 'POST'])
 def favorites():
-    ''' this view will list all the restaurants in the database '''
+    ''' this view will list all the favorites for a user'''
     pass
 
 
@@ -29,41 +29,45 @@ def add_restaurant():
     pass
 
 
-@app.route('/<int: restaurant_id>/edit_restaurant', methods=['POST', 'GET'])
+@app.route('/<int:restaurant_id>/edit_restaurant', methods=['POST', 'GET'])
 def edit_restaurant(restaurant_id):
     ''' this view will edit a restaurant in the database '''
     pass
 
 
-@app.route('/<int: restaurant_id>/add_item', methods=['POST', 'GET'])
+@app.route('/<int:restaurant_id>/add_item', methods=['POST', 'GET'])
 def add_menu_item(restaurant_id):
     ''' this view will add a menu item to the database '''
     pass
 
 
-@app.route('/<int: restaurant_id>/<int: menu_item_id>/edit_item', methods=['POST', 'GET'])
+@app.route('/<int:restaurant_id>/<int:menu_item_id>/edit_item', methods=['POST', 'GET'])
 def edit_menu_item(restaurant_id, menu_item_id):
     ''' this view will edit a menu item in the database '''
     pass
 
 
-@app.route('/<int: restaurant_id>', methods=['GET'])
+@app.route('/<int:restaurant_id>', methods=['GET'])
 def restaurant_page(restaurant_id):
+    '''this view will show the menu items for a restaurant '''
     pass
 
 
-@app.route('/<int: restaurant_id>/<int: item_id>', methods=['GET'])
+@app.route('/<int:restaurant_id>/<int:item_id>', methods=['GET'])
 def item_page(restaurant_id, item_id):
+    '''this view will show a menu item in detail '''
     pass
 
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
+    '''this view will login the user'''
     pass
 
 
 @app.route('/logout', methods=['POST'])
 def logout():
+    '''this view will be used to log out the user'''
     pass
 
 
@@ -73,12 +77,12 @@ def json_restaurants():
     pass
 
 
-@app.route('/json/<item: restaurant_id>')
+@app.route('/json/<int:restaurant_id>')
 def json_items(restaurant_id):
-    '''this view returns all restaurants in json view'''
+    '''this view returns all menu items for a restaurant in json view'''
     pass
 
 
 if __name__ == '__main__':
-    app.debug = True
-    app.run(port=8002)
+    params = dict(debug=True, host='localhost', port=8002)
+    app.run(**params)
