@@ -2,9 +2,10 @@
 + for route in routes:
     + implement route
     + test route
-+ for delete_item, add modal
-+. implement login/logout
-    +. test login/logout
++ for delete_item
+    + add modal
++ implement login/logout
+    + test login/logout
 + for route in routes:
     + complete front end
     + add csrf_token to forms
