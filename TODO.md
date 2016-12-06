@@ -1,25 +1,29 @@
 # steps
-+ implement login
-    + test login
 + for route in routes:
     + complete front end
         + can only edit/delete items you added
+        + add <3 for favorites
+        + add '+' for adding items
         + for delete_item
             + add modal
         + add csrf_token to forms
     + test front end
++ add pictures to database
++ test favorites
++ implement login
+    + test login
 + implement search
 
-# prettify
-+. split into modules?
-+. add css
-+. go through guidelines
-+. docstrings
+## prettify
++ split into modules?
++ add css
++ go through guidelines
++ docstrings
 
 # done
-+. setup database
-+. layout routes
-+. make sure each get/post skeletons are set up
++ setup database
++ layout routes
++ make sure each get/post skeletons are set up
 + for route in routes:
     + implement route
     + test route
