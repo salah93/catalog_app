@@ -1,6 +1,11 @@
-from flask import Flask, render_template, redirect, url_for, request, jsonify
-from flask import session as web_session
+'''
+simple app demonstrating CRUD
+'''
+
 from functools import wraps
+
+from flask import (Flask, abort, render_template, redirect, url_for,
+                   request, jsonify, session as web_session)
 from sqlalchemy.orm import sessionmaker
 
 from models import Item, User, Like, engine, Base, categories
