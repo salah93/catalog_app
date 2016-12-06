@@ -74,7 +74,7 @@ def edit_item(item):
     pass
 
 
-@app.route('/catalog/<item>/delete', methods=['POST', 'GET'])
+@app.route('/catalog/<item>/delete', methods=['POST'])
 @is_logged_in
 def delete_item(item):
     ''' this view will delete an item

@@ -2,13 +2,19 @@
 for route in routes:
     @. implement route
     @. test route
+- for delete_item, add modal
 6. implement login/logout
     +. test login/logout
+for route in routes:
+    @. complete front end
+    @. add csrf_token to forms
+    @. test front end
 
 # prettify
 1. split into modules?
 2. add css
 3. go through guidelines
+4. docstrings
 
 # done
 1. setup database
