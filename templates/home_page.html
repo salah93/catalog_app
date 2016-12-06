@@ -1,20 +1,18 @@
 {% extends 'layout.html' %}
 {% block content %}
+<h1> Carlito's List </h1>
 <div class='row'>
-    <div class='col-md-8'>
-        {% for i in range(10) %}
-            <div class='row'>
-                <h4> show categories </h4>
-            </div>
+    <div class='categories col-sm-4 col-md-4'>
+        {% for category in categories %}
+            <h4> {{category}} </h4>
         {% endfor %}
     </div>
 
-    <div class='col-md-16'>
-            {% for r in range(10) %}
-        <div class='row'>
-            <h4>r</h4>
-        </div>
-            {% endfor %}
+    <div class='latest col-sm-8 col-md-8'>
+        {% for item in latest %}
+            <h4>{{item.title}}</h4>
+            <h4>{{item.description}}</h4>
+        {% endfor %}
     </div>
 </div>
 {% endblock %}
