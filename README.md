@@ -1,14 +1,14 @@
-# CRUD with restaurants
-demonstrate full stack web app with full crud functionality with restaurant app
+# CRUD with items
+demonstrate full stack web app with full crud functionality with item app
 
 to run app locally, create a virtual environment and install the requirements, then hit python :)
 
 ```
-$ git clone https://github.com/salah93/restaurant_app.git
-$ cd restaurant_app
+$ git clone https://github.com/salah93/item_app.git
+$ cd item_app
 $ pip install -U pip, virtualenv
-$ virtualenv ~/.virtualenvs/restaurant_app
-$ . ~/.virtualenvs/restaurant_app/bin/activate
+$ virtualenv ~/.virtualenvs/item_app
+$ . ~/.virtualenvs/item_app/bin/activate
 $ pip install -r requirements.txt
 $ python app.py
 ```

@@ -13,7 +13,7 @@ def example()
 
 def test_add(example):
     obj = {}
-    post_url = 'add_item'
+    post_url = '/catalog/add'
     obj_id = requests.post(url % post_url, data=obj)
     assert obj_id
     obj_id = int(obj_id)
@@ -23,7 +23,7 @@ def test_add(example):
 
 def test_edit(example):
     old_obj = session.query(Restaurant).first()
-    post_url = 'edit_item/%d' % old_obj.id
+    post_url = '/catalog/{category}/{item}/edit'.format(category=old_obj.category, item=old_obj.title)
     new_name='test name'
     obj = {name=new_name, **old_obj}
     requests.post(url % post_url, data=obj)

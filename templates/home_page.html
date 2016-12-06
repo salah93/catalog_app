@@ -1,0 +1,20 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class='row'>
+    <div class='col-md-8'>
+        {% for i in range(10) %}
+            <div class='row'>
+                <h4> show categories </h4>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class='col-md-16'>
+            {% for r in range(10) %}
+        <div class='row'>
+            <h4>r</h4>
+        </div>
+            {% endfor %}
+    </div>
+</div>
+{% endblock %}

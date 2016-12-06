@@ -13,14 +13,17 @@
         <link rel="stylesheet" href="">
 	</head>
 	<body>
+    <!-- taskbar goes here -->
 		<div class="container-fluid">
-		
+      {% block content %}
+      {% endblock %}
 		</div>
-
         <!-- jQuery -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
         <!-- bootstrap js -->
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+        {% block scripts %}
+        {% endblock %}
         <!-- personal js -->
 	</body>
 </html>
