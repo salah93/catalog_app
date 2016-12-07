@@ -2,5 +2,5 @@
 {% block content %}
 <h1> {{header}} </h1>
 {% from 'form.html' import form %}
-{{ form(action='url_for("add_item")')}}
+{{ form(action=url, title=title, description=description, picture=picture, category=category)}}
 {% endblock %}

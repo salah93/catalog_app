@@ -65,13 +65,13 @@ def item_page(category, title):
 
 
 @app.route('/catalog/add', methods=['POST', 'GET'])
-# @confirm_login
+@confirm_login
 def add_item():
     ''' this view will add an item to the database
         only if logged in
     '''
     if request.method == 'GET':
-        return render_template('item_form.html', header='Add an item')
+        return render_template('item_form.html', url=request.path, header='Add an item')
     category = request.form.get('category', '')
     description = request.form.get('description', '').strip()
     title = request.form.get('title', '').strip()
@@ -82,7 +82,6 @@ def add_item():
                 category=category, user_email=web_session['email'])
     session.add(item)
     session.commit()
-    # TODO: check request.path or request.url  instead of home
     return redirect(url_for('home'))
 
 
@@ -100,7 +99,10 @@ def edit_item(title):
         flash('you can only edit your own items')
         return redirect(url_for('home'))
     if request.method == 'GET':
-        return render_template('item_form.html', header='Edit %s' % title, item=item)
+        return render_template('item_form.html',
+                               header='Edit %s' % title,
+                               url=request.path,
+                               **item.serialize)
     category = request.form.get('category', '')
     description = request.form.get('description', '').strip()
     new_title = request.form.get('title', '').strip()
