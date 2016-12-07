@@ -1,4 +1,3 @@
-<!-- add '+' to add item, add select2 for dropdown-->
 <nav class="navbar navbar-default">
   <div class="container-fluid">
     <!-- Brand and toggle get grouped for better mobile display -->
@@ -32,11 +31,15 @@
       </form>
 		<ul class="nav navbar-nav navbar-right">
 				{% if logged_in() %}
-					<li><a href="{{url_for('add_item')}}">Add</a></li>
+					<li>
+            <a href="{{url_for('add_item')}}">
+              <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add
+            </a>
+          </li>
 					<li><a href="{{url_for('logout')}}">log out</a></li>
 					<li><a href="{{url_for('profile')}}">Profile</a></li>
 				{% else %}
-					<li><a href="{{url_for('login')}}">log in</a></li>
+					<li><a style='color:black' class='btn btn-primary' href="{{url_for('login')}}">log in</a></li>
 				{% endif %}
       </ul>
     </div><!-- /.navbar-collapse -->

@@ -3,15 +3,26 @@
 <h1> Carlito's List </h1>
 <div class='row'>
     <div class='categories col-sm-4 col-md-4'>
+
+        <h2>Categories</h2>
         {% for category in categories %}
-            <h4> {{category}} </h4>
+        <p><a href='{{url_for("category_page", category=category)}}'> {{category}} </a></p>
         {% endfor %}
     </div>
 
     <div class='latest col-sm-8 col-md-8'>
+        <h2>Latest Items</h2>
         {% for item in latest %}
-            <h4>{{item.title}}</h4>
-            <h4>{{item.description}}</h4>
+            <div style='font-size:300%' class='row'>
+                <div class='col-sm-4 col-md-4'>
+                    <img src="{{item.picture}}">
+                </div>
+                <div class='col-sm-4 col-md-4'>
+                    <a href='{{url_for("item_page", category=item.category, title=item.title)}}'>{{item.title}}</a>
+                    <i><a href='{{url_for("category_page", category=item.category)}}'> ~ {{item.category}}</a></i>
+ 
+                </div>
+            </div>
         {% endfor %}
     </div>
 </div>
