@@ -1,0 +1,19 @@
+{% macro form(action='', title='', picture='', description='') -%}
+		<form method='POST' action='{{action}}'>
+			<label>Title</label>
+			<input class='form-control' value="{{ title }}" name="title">
+			<label>Picture (optional)</label>
+			<input class='form-control' value="{{ picture }}" name="picture">
+			<label>Description</label>
+      <textarea class='form-control' value="{{ description }}" name="description"></textarea>
+			<label>Category</label>
+				<select class="select-categories">
+          <option></option>
+					{% for c in categories %}
+						<option value="{{c}}">{{c}}</option>
+					{% endfor %}
+				</select>
+        <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
+			<input class='btn btn-primary' type='submit' value='Submit'>
+		</form>
+{%- endmacro %}
