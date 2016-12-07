@@ -1,0 +1,6 @@
+{% extends 'layout.html' %}
+{% block content %}
+<h1> {{header}} </h1>
+{% from 'form.html' import form %}
+{{ form(action='url_for("add_item")')}}
+{% endblock %}
