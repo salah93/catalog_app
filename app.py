@@ -45,7 +45,7 @@ def home():
 def category_page(category):
     '''this view will show the items for a specific category '''
     if category not in categories:
-        return render_template('no_such_category.html'), 400
+        return render_template('no_such.html', object='category'), 400
     items = session.query(Item).filter_by(category=category).order_by(Item.title)
     return render_template('category_page.html', category=category, items=items)
 
@@ -56,11 +56,11 @@ def item_page(category, title):
         once you log in, you can edit item
     '''
     if category not in categories:
-        return render_template('no_such_category.html'), 400
+        return render_template('no_such.html', object='category'), 400
     # TODO: what to do if multiple items have same name & same category
     item = session.query(Item).filter_by(category=category, title=title).first()
     if not item:
-        return render_template('no_such_item.html'), 400
+        return render_template('no_such.html', object='item'), 400
     return render_template('item_page.html', **item.serialize)
 
 
@@ -95,7 +95,7 @@ def edit_item(title):
     '''
     item = session.query(Item).filter_by(title=title).first()
     if not item:
-        return render_template('no_such_item.html'), 400
+        return render_template('no_such.html', object='item'), 400
     if item.user_email != web_session['email']:
         flash('you can only edit your own items')
         return redirect(url_for('home'))
