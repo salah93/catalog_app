@@ -47,7 +47,7 @@ def category_page(category):
     if category not in categories:
         return render_template('no_such_category.html'), 400
     items = session.query(Item).filter_by(category=category).order_by(Item.title)
-    return render_template('category_page.html', items=items)
+    return render_template('category_page.html', category=category, items=items)
 
 
 @app.route('/catalog/<category>/<title>', methods=['GET'])
@@ -61,7 +61,7 @@ def item_page(category, title):
     item = session.query(Item).filter_by(category=category, title=title).first()
     if not item:
         return render_template('no_such_item.html'), 400
-    return render_template('item_page.html', item=item)
+    return render_template('item_page.html', **item.serialize)
 
 
 @app.route('/catalog/add', methods=['POST', 'GET'])
@@ -78,7 +78,8 @@ def add_item():
     if not (category and title and description) or category not in categories:
         flash('add failed')
         return redirect(url_for('home'))
-    item = Item(title=title, description=description, category=category, user_email=web_session['email'])
+    item = Item(title=title, description=description,
+                category=category, user_email=web_session['email'])
     session.add(item)
     session.commit()
     # TODO: check request.path or request.url  instead of home
@@ -155,9 +156,8 @@ def json_catalog():
 @confirm_login
 def profile():
     ''' this view will list all the favorites for a user'''
-    # TODO: test favorites
     user = session.query(User).get(web_session['email'])
-    favorites = session.query(Item).filter(Like.user=user)
+    favorites = (l.item for l in session.query(Like).filter_by(user=user))
     items = session.query(Item).filter_by(user=user)
     return render_template('profile.html', favorites=favorites, items=items, **user.serialize)
 
