@@ -61,7 +61,8 @@ def item_page(category, title):
     item = session.query(Item).filter_by(category=category, title=title).first()
     if not item:
         return render_template('no_such.html', object='item'), 400
-    return render_template('item_page.html', **item.serialize)
+    editable = item.user_email == web_session.get('email', '')
+    return render_template('item_page.html', editable=editable, **item.serialize)
 
 
 @app.route('/catalog/add', methods=['POST', 'GET'])
