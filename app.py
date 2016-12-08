@@ -8,6 +8,7 @@ from flask import (Flask, abort, flash, render_template,
                    redirect, url_for, request, jsonify,
                    session as web_session)
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy import or_
 
 from models import Item, User, Like, engine, Base, categories
 from utility import random_string
@@ -138,7 +139,8 @@ def delete_item(title):
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     '''this view will login the user'''
-    pass
+    if request.method == 'GET':
+        return render_template('login.html')
 
 
 @app.route('/logout', methods=['POST'])
@@ -163,6 +165,30 @@ def profile():
     favorites = (l.item for l in session.query(Like).filter_by(user=user))
     items = session.query(Item).filter_by(user=user)
     return render_template('profile.html', favorites=favorites, items=items, **user.serialize)
+
+
+@app.route('/catalog/favorite/<title>', methods=['POST'])
+@confirm_login
+def favorite(title):
+    ''' this view will list all the favorites for a user'''
+    user = session.query(User).get(web_session['email'])
+    print(title)
+    item = session.query(Item).filter_by(title=title).first()
+    if not item:
+        return jsonify(favorite='fail')
+    like = Like(user=user, item=item)
+    session.add(like)
+    session.commit()
+    return jsonify(favorite='successful')
+
+
+@app.route('/search', methods=['GET'])
+def search():
+    term = request.args.get('search')
+    items = session.query(Item).filter(or_(
+        Item.category.like('%{0}%'.format(term)),
+        Item.title.like('%{0}%'.format(term))))
+    return render_template('search.html', term=term, items=items)
 
 
 @app.before_request

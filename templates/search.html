@@ -1,0 +1,18 @@
+{% extends 'layout.html' %}
+{% block content %}
+<h1> search results for <i> {{term}} </i></h1>
+<div class='row'>
+        {% for item in items %}
+            <div style='font-size:300%' class='row'>
+                <div class='col-sm-4 col-md-4'>
+                    <img src="{{item.picture}}">
+                </div>
+                <div class='col-sm-8 col-md-8'>
+                    <a href='{{url_for("item_page", category=item.category, title=item.title)}}'>{{item.title}}</a>
+                    <i><a href='{{url_for("category_page", category=item.category)}}'> ~ {{item.category}}</a></i>
+                </div>
+            </div>
+            <hr>
+        {% endfor %}
+</div>
+{% endblock %}
