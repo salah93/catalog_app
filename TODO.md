@@ -1,18 +1,13 @@
 # steps
-+ for route in routes:
-    + complete front end
-        + can only edit/delete items you added
-        + add <3 for favorites
-        + add '+' for adding items
-        + for delete_item
-            + add modal
-        + add csrf_token to forms
-    + test front end
-+ add pictures to database
-+ test favorites
++ favorites
+    + if favorited
+        + have class = heart
+        + if click heart
+        + unfavorite
+        + remove class heart-empty
+        + add class heart
 + implement login
     + test login
-+ implement search
 
 ## prettify
 + split into modules?
@@ -28,6 +23,8 @@
     + implement route
     + test route
 + implement logout
++ profile
++ add/edit/favorite
 
 # log
 #### 2016-11-29 19:18:20.090064
@@ -40,3 +37,5 @@ setup database, add decorators to check for log in and csrf protection
 implement routes
 #### 2016-12-06 17:08:33.828055
 implement logout
+#### 2016-12-07 19:48:12.568142
+add icons to add/edit/fave, add all templates, complete most of backend
