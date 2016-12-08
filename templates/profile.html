@@ -1,4 +1,39 @@
 {% extends 'layout.html' %}
 {% block content %}
-<h1>Profile</h1>
+<h1>{{name}}'s Profile</h1>
+<img src={{picture}}>
+<div class='row'>
+    <div class='categories col-sm-6 col-md-6'>
+
+        <h3> Items added </h3>
+        {% for item in items %}
+            <div style='font-size:300%' class='row'>
+                <div class='col-sm-3 col-md-3'>
+                    <img src="{{item.picture}}">
+                </div>
+                <div class='col-sm-3 col-md-3'>
+                    <a href='{{url_for("item_page", category=item.category, title=item.title)}}'>{{item.title}}</a>
+                    <i><a href='{{url_for("category_page", category=item.category)}}'> ~ {{item.category}}</a></i>
+ 
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class='latest col-sm-6 col-md-6'>
+        <h3> Favorites </h3>
+        {% for item in favorites %}
+            <div style='font-size:300%' class='row'>
+                <div class='col-sm-3 col-md-3'>
+                    <img src="{{item.picture}}">
+                </div>
+                <div class='col-sm-3 col-md-3'>
+                    <a href='{{url_for("item_page", category=item.category, title=item.title)}}'>{{item.title}}</a>
+                    <i><a href='{{url_for("category_page", category=item.category)}}'> ~ {{item.category}}</a></i>
+ 
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
 {% endblock %}
