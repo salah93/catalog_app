@@ -2,4 +2,4 @@ flask
 sqlalchemy
 tox
 requests
-oauth
+oauth2client
