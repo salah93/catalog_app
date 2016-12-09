@@ -1,10 +1,14 @@
 # steps
++ find way to retrieve right items when viewing/editing/deleting (TODO)
 
 ## prettify
 + split into modules?
 + add css
 + go through guidelines
 + docstrings
++ comments
++ tests
++ add github oauth
 
 # done
 + setup database
@@ -16,6 +20,7 @@
 + implement logout
 + profile
 + add/edit/favorite
++ add more json endpoints
 + flash messages
 + make images round
 + 404 page
