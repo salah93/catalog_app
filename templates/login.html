@@ -47,9 +47,7 @@ function signInCallback(authResult) {
       type: 'POST',
       url: '/gconnect',
       processData: false,
-      data: {"state": '{{state()}}',
-             "data": authResult['code'],
-            },
+      data: '{"state": "{{state()}}", "code": "' + authResult['code'] + '"}',
       contentType: 'application/octet-stream; charset=utf-8',
       success: function(result) {
         // Handle or verify the server response if necessary.
@@ -108,9 +106,7 @@ function signInCallback(authResult) {
       type: 'POST',
       url: '/fbconnect',
       processData: false,
-      data: {"state": '{{state()}}',
-             "data": access_token,
-            },
+      data: '{"state": "{{state()}}", "access_token": "' + access_token + '"}',
       contentType: 'application/octet-stream; charset=utf-8',
       success: function(result) {
         // Handle or verify the server response if necessary.

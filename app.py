@@ -45,8 +45,17 @@ def is_logged_in():
 def check_state_token(*args, **kwargs):
     ''' check a post request for a state token, protects against csrf attack '''
     if request.method == 'POST':
-        state = web_session.pop('state', None)
-        if request.form.get('state', '') != state:
+        connect_methods = ['/gconnect', '/fbconnect', '/ghconnect']
+        if request.path in connect_methods:
+            data = request.data.decode('utf-8') 
+            page_state = json.loads(data)['state']  
+        else:
+            page_state = request.form.get('state')
+        state = web_session.get('state', None)
+        print('state = %s' % state)
+        print('page_state = %s' % page_state)
+        if not state or page_state != state:
+            print('forbidden')
             abort(403)
 
 
@@ -56,6 +65,7 @@ def generate_state_token():
     '''
     if 'state' not in web_session:
         web_session['state'] = random_string()
+        print(web_session['state'])
     return web_session['state']
 
 
@@ -172,8 +182,14 @@ def delete_item(title, item_id):
     if item.user_email != web_session['email']:
         flash('you can only delete your own items')
         return redirect(url_for('home'))
+    # before deleting, delete all likes attributed with this item
+    likes = session.query(Like).filter_by(item=item).all()
+    print(likes)
+    [session.delete(l) for l in likes]
     session.delete(item)
     session.commit()
+    likes = session.query(Like).filter_by(item=item).all()
+    print(likes)
     flash('item successfully deleted')
     return redirect(url_for('home'))
 
@@ -207,7 +223,9 @@ def gdisconnect():
 @app.route('/fbconnect', methods=['POST'])
 def fbconnect():
     ''' connect to facebook via oauth api '''
-    access_token = request.form.get('data', '')
+    # access_token = request.data
+    data = request.data.decode('utf-8') 
+    access_token = json.loads(data)['access_token']
     print(access_token)
     with open('fb_client_secrets.json', 'r') as f:
         client_secret = json.loads(f.read())
@@ -215,7 +233,7 @@ def fbconnect():
     app_secret = client_secret['web']['app_secret']
     url = 'https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id=%s&client_secret=%s&fb_exchange_token=%s'
     url = url % (app_id, app_secret, access_token)
-    result = requests.get(url).content
+    result = requests.get(url).text
     print(result)
     # strip expire tag from access token
     token = result.split("&")[0]
@@ -264,7 +282,9 @@ def fbdisconnect():
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
     ''' login via google oauth api '''
-    code = request.form.get('data', '')
+    # code = request.data
+    data = request.data.decode('utf-8') 
+    code = json.loads(data)['code']
     print(code)
     try:
         # Upgrade the authorization code into a credentials object
@@ -377,7 +397,8 @@ def json_item(category, title):
 def profile():
     ''' this view will list all the favorites for a user'''
     user = session.query(User).get(web_session['email'])
-    favorites = (l.item for l in session.query(Like).filter_by(user=user))
+    favorites = [l.item for l in session.query(Like).filter_by(user=user)]
+    print(favorites)
     items = session.query(Item).filter_by(user=user)
     return render_template('profile.html', favorites=favorites, items=items, **user.serialize)
 

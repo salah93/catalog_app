@@ -1,4 +1,7 @@
 # steps
++ ajax return data as string so form.get does not work
++ other form return data as form.get
++ find a way to check for both for state token
 
 ## prettify
 + split into modules?
