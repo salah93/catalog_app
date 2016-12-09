@@ -51,11 +51,8 @@ def check_state_token(*args, **kwargs):
             page_state = json.loads(data)['state']  
         else:
             page_state = request.form.get('state')
-        state = web_session.get('state', None)
-        print('state = %s' % state)
-        print('page_state = %s' % page_state)
+        state = web_session.pop('state', None)
         if not state or page_state != state:
-            print('forbidden')
             abort(403)
 
 
@@ -65,7 +62,6 @@ def generate_state_token():
     '''
     if 'state' not in web_session:
         web_session['state'] = random_string()
-        print(web_session['state'])
     return web_session['state']
 
 
@@ -184,12 +180,10 @@ def delete_item(title, item_id):
         return redirect(url_for('home'))
     # before deleting, delete all likes attributed with this item
     likes = session.query(Like).filter_by(item=item).all()
-    print(likes)
     [session.delete(l) for l in likes]
     session.delete(item)
     session.commit()
     likes = session.query(Like).filter_by(item=item).all()
-    print(likes)
     flash('item successfully deleted')
     return redirect(url_for('home'))
 
@@ -226,7 +220,6 @@ def fbconnect():
     # access_token = request.data
     data = request.data.decode('utf-8') 
     access_token = json.loads(data)['access_token']
-    print(access_token)
     with open('fb_client_secrets.json', 'r') as f:
         client_secret = json.loads(f.read())
     app_id = client_secret['web']['app_id']
@@ -234,7 +227,6 @@ def fbconnect():
     url = 'https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id=%s&client_secret=%s&fb_exchange_token=%s'
     url = url % (app_id, app_secret, access_token)
     result = requests.get(url).text
-    print(result)
     # strip expire tag from access token
     token = result.split("&")[0]
     access_token = token.split("=")[1]
@@ -285,7 +277,6 @@ def gconnect():
     # code = request.data
     data = request.data.decode('utf-8') 
     code = json.loads(data)['code']
-    print(code)
     try:
         # Upgrade the authorization code into a credentials object
         oauth_flow = flow_from_clientsecrets('google_client_secrets.json', scope='')
@@ -398,7 +389,6 @@ def profile():
     ''' this view will list all the favorites for a user'''
     user = session.query(User).get(web_session['email'])
     favorites = [l.item for l in session.query(Like).filter_by(user=user)]
-    print(favorites)
     items = session.query(Item).filter_by(user=user)
     return render_template('profile.html', favorites=favorites, items=items, **user.serialize)
 
@@ -409,21 +399,21 @@ def favorite(title, item_id):
     ''' this view will list all the favorites for a user'''
 
     user = session.query(User).get(web_session['email'])
-    print(title)
     # item = session.query(Item).filter_by(title=title).first()
     item = session.query(Item).get(item_id)
+    state = generate_state_token()
     if not item or item.user == user:
-        return jsonify(favorite='fail')
+        return jsonify(favorite='fail', state=state)
     old_like = session.query(Like).filter_by(user=user, item=item).first()
     if old_like:
         session.delete(old_like)
         session.commit()
-        return jsonify(favorite='successful', like='unliked')
+        return jsonify(favorite='successful', like='unliked', state=state)
     else:
         like = Like(user=user, item=item)
         session.add(like)
         session.commit()
-        return jsonify(favorite='successful', like='liked')
+        return jsonify(favorite='successful', like='liked', state=state)
 
 
 @app.route('/search')

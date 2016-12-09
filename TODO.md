@@ -1,18 +1,15 @@
-# steps
-+ ajax return data as string so form.get does not work
-+ other form return data as form.get
-+ find a way to check for both for state token
+# todo
 
 ## prettify
 + split into modules?
 + add css
-+ go through guidelines
-+ docstrings
 + comments
 + tests
 + add github oauth
 
 # done
++ docstrings
++ go through guidelines
 + find way to retrieve right items when viewing/editing/deleting (TODO)
     + add item id to item_page, edit_item, delete_item
 + setup database
@@ -30,6 +27,9 @@
 + 404 page
 + add generate csrftoken again
     + send csrf token to all views that post
++ ajax return data as string so form.get does not work
++ other form return data as form.get
++ find a way to check for both for state token
 
 # log
 #### 2016-11-29 19:18:20.090064

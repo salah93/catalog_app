@@ -11,11 +11,11 @@
                                 <button type='button' class='delete-btn btn btn-link btn-lg' data-toggle='modal' data-target='#deleteModal'>                            <span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
                             {% else %}
                                 {% if favorited %}
-                                    <button type='button' class='favorite-btn btn btn-link btn-lg'>
+                                <button type='button' value='{{state()}}' class='favorite-btn btn btn-link btn-lg'>
                                         <span class="glyphicon glyphicon-heart" aria-hidden="true"></span>
                                     </button>
                                 {% else %}
-                                    <button type='button' class='favorite-btn btn btn-link btn-lg'>
+                                    <button value='{{state()}}' type='button' class='favorite-btn btn btn-link btn-lg'>
                                         <span class="glyphicon glyphicon-heart-empty" aria-hidden="true"></span>
                                     </button>
                                 {% endif %}
@@ -65,18 +65,21 @@
 {% block scripts %}
     <script>
         $('.favorite-btn').click(function(data){
-            var $btn = $(data.target)
-                $.post('{{url_for("favorite", title=title, item_id=id)}}', data={'state': '{{state()}}'}, function(result){
+            var $btn = $('.favorite-btn')
+            var $span = $btn.find('span')
+            var state = $btn.val()
+                $.post('{{url_for("favorite", title=title, item_id=id)}}', data={'state': state}, function(result){
                 console.log(result);
+                $btn.val(result['state']);
                 if (result['like'] == 'liked') {
-                    $btn.toggleClass('glyphicon-heart-empty', false);
-                    $btn.toggleClass('glyphicon-heart', true);
+                    $span.toggleClass('glyphicon-heart-empty', false);
+                    $span.toggleClass('glyphicon-heart', true);
                 }
                 else if (result['like'] == 'unliked') {
-                    $btn.toggleClass('glyphicon-heart-empty', true);
-                    $btn.toggleClass('glyphicon-heart', false);
+                    $span.toggleClass('glyphicon-heart-empty', true);
+                    $span.toggleClass('glyphicon-heart', false);
                 }
-            });
+            }, dataType='json');
         });
     </script>
 {% endblock %}
