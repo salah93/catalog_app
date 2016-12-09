@@ -38,10 +38,8 @@
 <script>
 function signInCallback(authResult) {
   if (authResult['code']) {
-
     // Hide the sign-in button now that the user is authorized
     $('#signInButton').attr('style', 'display: none');
-
     // Send the one-time-use code to the server, if the server responds, write a 'login successful' message to the web page and then redirect back to the main restaurants page
     $.ajax({
       type: 'POST',
@@ -56,7 +54,7 @@ function signInCallback(authResult) {
           $('#result').html('<h2>Login Successful!</h2>'+ output + '</br>Redirecting...')
           setTimeout(function() {
             window.location.href = "{{url_for('home')}}";
-          }, 4000);
+          }, 2000);
           
 
       } else if (authResult['error']) {
