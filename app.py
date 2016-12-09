@@ -322,10 +322,10 @@ def logout():
     if oauth_provider:
         if 'google' in oauth_provider:
             gdisconnect()
-        elif 'github' in oauth_provider:
-            ghdisconnect()
         elif 'facebook' in oauth_provider:
             fbdisconnect()
+        elif 'github' in oauth_provider:
+            ghdisconnect()
     return redirect(url_for('home'))
 
 
@@ -334,6 +334,23 @@ def json_catalog():
     '''this view returns all items in json view'''
     items = session.query(Item)
     return jsonify(items=[i.serialize for i in items])
+
+
+@app.route('/catalog/<category>/items.json')
+def json_category(category):
+    '''this view returns all items of a category in json view'''
+    items = session.query(Item).filter_by(category=category)
+    return jsonify(items=[i.serialize for i in items])
+
+
+@app.route('/catalog/<category>/<title>/item.json')
+def json_item(category, title):
+    '''this view returns an item description in json view'''
+    item = session.query(Item).filter_by(
+            category=category, title=title).first()
+    if not item:
+        return jsonify(item=None)
+    return jsonify(item=item.serialize)
 
 
 @app.route('/profile', methods=['GET'])
