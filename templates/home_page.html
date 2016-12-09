@@ -18,7 +18,7 @@
                     <img src="{{item.picture}}">
                 </div>
                 <div class='col-sm-4 col-md-4'>
-                    <a href='{{url_for("item_page", category=item.category, title=item.title)}}'>{{item.title}}</a>
+                    <a href='{{url_for("item_page", category=item.category, title=item.title, item_id=item.id)}}'>{{item.title}}</a>
                     <i><a href='{{url_for("category_page", category=item.category)}}'> ~ {{item.category}}</a></i>
  
                 </div>

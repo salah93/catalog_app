@@ -41,15 +41,13 @@ def is_logged_in():
     return 'logged_in' in web_session
 
 
-@app.before_request(f)
+@app.before_request
 def check_state_token(*args, **kwargs):
     ''' check a post request for a state token, protects against csrf attack '''
     if request.method == 'POST':
         state = web_session.pop('state', None)
         if request.form.get('state', '') != state:
             abort(403)
-    # TODO: what to return here?
-    return f(*args, **kwargs)
 
 
 def generate_state_token():
@@ -384,14 +382,15 @@ def profile():
     return render_template('profile.html', favorites=favorites, items=items, **user.serialize)
 
 
-@app.route('/catalog/favorite/<title>', methods=['POST'])
+@app.route('/catalog/favorite/<title>/<int:item_id>', methods=['POST'])
 @confirm_login
-def favorite(title):
+def favorite(title, item_id):
     ''' this view will list all the favorites for a user'''
 
     user = session.query(User).get(web_session['email'])
     print(title)
-    item = session.query(Item).filter_by(title=title).first()
+    # item = session.query(Item).filter_by(title=title).first()
+    item = session.query(Item).get(item_id)
     if not item or item.user == user:
         return jsonify(favorite='fail')
     old_like = session.query(Like).filter_by(user=user, item=item).first()

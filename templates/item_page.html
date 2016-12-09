@@ -66,7 +66,7 @@
     <script>
         $('.favorite-btn').click(function(data){
             var $btn = $(data.target)
-                $.post('{{url_for("favorite", title=title)}}', data={'state': '{{state()}}'}, function(result){
+                $.post('{{url_for("favorite", title=title, item_id=id}}', data={'state': '{{state()}}'}, function(result){
                 console.log(result);
                 if (result['like'] == 'liked') {
                     $btn.toggleClass('glyphicon-heart-empty', false);
