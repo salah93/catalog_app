@@ -47,7 +47,7 @@ def home():
 def category_page(category):
     '''this view will show the items for a specific category '''
     if category not in categories:
-        return render_template('no_such.html', object='category'), 400
+        return render_template('no_such.html', _object='category'), 400
     items = session.query(Item).filter_by(category=category).order_by(Item.title)
     return render_template('category_page.html', category=category, items=items)
 
@@ -58,11 +58,11 @@ def item_page(category, title):
         once you log in, you can edit item
     '''
     if category not in categories:
-        return render_template('no_such.html', object='category'), 400
+        return render_template('no_such.html', _object='category'), 400
     # TODO: what to do if multiple items have same name & same category
     item = session.query(Item).filter_by(category=category, title=title).first()
     if not item:
-        return render_template('no_such.html', object='item'), 400
+        return render_template('no_such.html', _object='item'), 400
     editable = item.user_email == web_session.get('email', '')
     favorited = session.query(Like).filter_by(
         item=item, user_email=web_session.get('email', '')).first()
@@ -104,7 +104,7 @@ def edit_item(title):
     '''
     item = session.query(Item).filter_by(title=title).first()
     if not item:
-        return render_template('no_such.html', object='item'), 400
+        return render_template('no_such.html', _object='item'), 400
     if item.user_email != web_session['email']:
         flash('you can only edit your own items')
         return redirect(url_for('home'))
@@ -187,7 +187,7 @@ def fbconnect():
     access_token = request.data
 
     with open('fb_client_secrets.json', 'r') as f:
-	client_secret = json.loads(f.read())
+        client_secret = json.loads(f.read())
     app_id = client_secret['web']['app_id']
     app_secret = client_secret['web']['app_secret']
     url = 'https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id=%s&client_secret=%s&fb_exchange_token=%s' % (
@@ -207,7 +207,7 @@ def fbconnect():
     data = requests.get(url).json()
     picture = data["data"]["url"]
     web_session['access_token'] = access_token
-    web_session['username'], web_session['picture'], web_session['email'] = name, picture, email 
+    web_session['username'], web_session['picture'], web_session['email'] = name, picture, email
     web_session['logged_in'], web_session['oauth_provider'] = True, 'facebook'
     # see if user exists
     user = session.query(User).get(email)
@@ -229,6 +229,11 @@ def fbdisconnect():
     access_token = web_session['access_token']
     url = 'https://graph.facebook.com/%s/permissions?access_token=%s' % (facebook_id, access_token)
     requests.delete(url)
+    web_session.pop('access_token', None)
+    web_session.pop('facebook_id', None)
+    web_session.pop('username', None)
+    web_session.pop('email', None)
+    web_session.pop('picture', None)
     return True
 
 
@@ -268,7 +273,10 @@ def gconnect():
         return response
 
     # Verify that the access token is valid for this app.
-    if result['issued_to'] != CLIENT_ID:
+    with open('google_client_secrets.json', 'r') as f:
+        client_secret = json.loads(f.read())
+    client_id = client_secret['web']['client_id']
+    if result['issued_to'] != client_id:
         response = make_response(
             json.dumps("Token's client ID does not match app's."), 401)
         response.headers['Content-Type'] = 'application/json'
@@ -307,8 +315,8 @@ def gconnect():
 def logout():
     '''this view will be used to log out the user'''
     web_session.pop('logged_in', None)
-    if 'oauth_provider' in web_session:
-        oauth_provider = web_session['oauth_provider']
+    oauth_provider = web_session.pop('oauth_provider', None)
+    if oauth_provider:
         if 'google' in oauth_provider:
             gdisconnect()
         elif 'github' in oauth_provider:
@@ -366,32 +374,16 @@ def search():
     return render_template('search.html', term=term, items=items)
 
 
-def csrf_protect():
-    ''' protect against csrf attacks
-        taken from flask snippets http://flask.pocoo.org/snippets/3/,
-        add this to all forms:
-        <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
-    '''
-    if request.method == 'POST':
-        token = web_session.pop('_csrf_token', None)
-        if not token or token != request.form.get('_csrf_token'):
-            abort(403)
-
-
-def generate_csrf_token():
-    if '_csrf_token' not in web_session:
-        web_session['_csrf_token'] = random_string()
-    return web_session['_csrf_token']
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('no_such.html', _object='Page'), 404
 
 
 if __name__ == '__main__':
     Base.metadata.bind = engine
     dbsession = sessionmaker(bind=engine)
     session = dbsession()
-    CLIENT_ID = json.loads(
-        open('google_client_secrets.json', 'r').read())['web']['client_id']
     app.secret_key = random_string(30)
-    app.jinja_env.globals['csrf_token'] = generate_csrf_token
     app.jinja_env.globals['categories'] = sorted(categories)
     app.jinja_env.globals['logged_in'] = is_logged_in
     params = dict(debug=True, host='localhost', port=8002)

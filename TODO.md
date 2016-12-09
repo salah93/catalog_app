@@ -1,5 +1,4 @@
 # steps
-+ 404 page
 
 ## prettify
 + split into modules?
@@ -19,6 +18,7 @@
 + add/edit/favorite
 + flash messages
 + make images round
++ 404 page
 
 # log
 #### 2016-11-29 19:18:20.090064
