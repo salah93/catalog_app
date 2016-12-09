@@ -178,6 +178,60 @@ def gdisconnect():
         return False
 
 
+@app.route('/fbconnect', methods=['POST'])
+def fbconnect():
+    if request.args.get('state') != web_session['state']:
+        response = make_response(json.dumps('Invalid state parameter.'), 401)
+        response.headers['Content-Type'] = 'application/json'
+        return response
+    access_token = request.data
+
+    with open('fb_client_secrets.json', 'r') as f:
+	client_secret = json.loads(f.read())
+    app_id = client_secret['web']['app_id']
+    app_secret = client_secret['web']['app_secret']
+    url = 'https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id=%s&client_secret=%s&fb_exchange_token=%s' % (
+        app_id, app_secret, access_token)
+    result = requests.get(url).content
+    print(result)
+    # strip expire tag from access token
+    token = result.split("&")[0]
+    access_token = token.split("=")[1]
+    # Use token to get user info from API
+    url = 'https://graph.facebook.com/v2.4/me?%s&fields=name,id,email' % token
+    data = requests.get(url).json()
+    name, email = data['name'], data['email']
+    web_session['facebook_id'] = data["id"]
+    # Get user picture
+    url = 'https://graph.facebook.com/v2.4/me/picture?%s&redirect=0&height=200&width=200' % token
+    data = requests.get(url).json()
+    picture = data["data"]["url"]
+    web_session['access_token'] = access_token
+    web_session['username'], web_session['picture'], web_session['email'] = name, picture, email 
+    web_session['logged_in'], web_session['oauth_provider'] = True, 'facebook'
+    # see if user exists
+    user = session.query(User).get(email)
+    if not user:
+        user = User(email=email, name=name, picture=picture)
+        session.add(user)
+    else:
+        user.name = name
+        user.email = email
+        user.picture = picture
+    session.commit()
+    flash("Now logged in as %s" % name)
+    return name
+
+
+def fbdisconnect():
+    facebook_id = web_session['facebook_id']
+    # The access token must me included to successfully logout
+    access_token = web_session['access_token']
+    url = 'https://graph.facebook.com/%s/permissions?access_token=%s' % (facebook_id, access_token)
+    requests.delete(url)
+    return True
+
+
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
     if request.args.get('state', '') != web_session.get('state'):

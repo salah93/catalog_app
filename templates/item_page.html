@@ -63,7 +63,7 @@
 {% endblock %}
 {% block scripts %}
     <script>
-        $('.favorite').click(function(data){
+        $('.favorite-btn').click(function(data){
             var $btn = $(data.target)
             $.post('{{url_for("favorite", title=title)}}', function(result){
                 console.log(result);
