@@ -13,7 +13,7 @@
     <div class='latest col-sm-8 col-md-8'>
         <h2>Latest Items</h2>
         {% for item in latest %}
-            <div style='font-size:300%' class='row'>
+            <div class='row'>
                 <div class='col-sm-4 col-md-4'>
                     <img src="{{item.picture}}">
                 </div>
@@ -23,6 +23,7 @@
  
                 </div>
             </div>
+            <hr>
         {% endfor %}
     </div>
 </div>

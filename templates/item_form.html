@@ -1,6 +1,18 @@
 {% extends 'layout.html' %}
+{% block sheets %}
+    <!-- select2 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css" rel="stylesheet" />
+{% endblock %}
 {% block content %}
 <h1> {{header}} </h1>
 {% from 'form.html' import form %}
 {{ form(action=url, title=title, description=description, picture=picture, category=category)}}
+{% endblock %}
+{% block scripts %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
+    <script type="text/javascript">
+    $(".select-categories").select2({
+        placeholder: "Category"
+    });
+    </script>
 {% endblock %}

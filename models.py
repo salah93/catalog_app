@@ -18,8 +18,7 @@ class User(Base):
 
     @property
     def serialize(self):
-        return {'id': self.id,
-                'email': self.email,
+        return {'email': self.email,
                 'picture': self.picture,
                 'name': self.name}
 

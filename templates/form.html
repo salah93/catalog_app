@@ -7,7 +7,7 @@
 			<label>Description</label>
       <textarea rows=10 class='form-control' name="description">{{ description }}</textarea>
 			<label>Category</label>
-				<select class="select-categories">
+				<select name='category' class="select-categories">
           <option></option>
 					{% for c in categories %}
             {% if c == category %}

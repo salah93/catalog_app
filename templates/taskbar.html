@@ -32,14 +32,14 @@
 		<ul class="nav navbar-nav navbar-right">
 				{% if logged_in() %}
 					<li>
-            <a href="{{url_for('add_item')}}">
-              <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add
+            <a class='add-btn' href="{{url_for('add_item')}}">
+              <span title="add an item" class="glyphicon glyphicon-plus" aria-hidden="true"></span>
             </a>
           </li>
 					<li><a href="{{url_for('logout')}}">log out</a></li>
 					<li><a href="{{url_for('profile')}}">Profile</a></li>
 				{% else %}
-					<li><a style='color:black' class='btn btn-primary' href="{{url_for('login')}}">log in</a></li>
+					<li><a class='btn btn-secondary' href="{{url_for('login')}}">log in</a></li>
 				{% endif %}
       </ul>
     </div><!-- /.navbar-collapse -->

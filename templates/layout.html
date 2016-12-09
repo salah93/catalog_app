@@ -10,14 +10,25 @@
         <!-- bootstrap css -->
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
         <!-- personal stylesheet -->
-        <link rel="stylesheet" href="">
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css" rel="stylesheet" />
+        <link rel="stylesheet" href="{{url_for('static', filename='styles.css')}}">
+        {% block sheets %}
+        {% endblock %}
 	</head>
 	<body>
     <!-- taskbar goes here -->
 		<div class="container-fluid">
-
       {% include 'taskbar.html'%}
+
+			{% with messages = get_flashed_messages() %}
+				{% if messages %}
+					<ul class='flashes'>
+					{% for message in messages %}
+							<li>{{ message }}</li>
+					{% endfor %}
+					</ul>
+				{% endif %}
+			{% endwith %}
+
       {% block content %}
       {% endblock %}
 		</div>
@@ -25,12 +36,6 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
         <!-- bootstrap js -->
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
-          <script type="text/javascript">
-            $(".select-categories").select2({
-              placeholder: "Category"
-            });
-          </script>
         <!-- personal js -->
         {% block scripts %}
         {% endblock %}

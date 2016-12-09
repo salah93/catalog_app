@@ -1,13 +1,5 @@
 # steps
-+ favorites
-    + if favorited
-        + have class = heart
-        + if click heart
-        + unfavorite
-        + remove class heart-empty
-        + add class heart
-+ implement login
-    + test login
++ 404 page
 
 ## prettify
 + split into modules?
@@ -25,6 +17,8 @@
 + implement logout
 + profile
 + add/edit/favorite
++ flash messages
++ make images round
 
 # log
 #### 2016-11-29 19:18:20.090064
