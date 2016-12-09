@@ -21,11 +21,10 @@ from utility import random_string
 app = Flask(__name__)
 
 
-def is_logged_in():
-    return 'logged_in' in web_session
-
-
 def confirm_login(func):
+    ''' confirm a user is logged in
+        to be used as a decorator for adding/editing/deleting
+    '''
     @wraps(func)
     def inner(*args, **kwargs):
         if not is_logged_in():
@@ -34,18 +33,35 @@ def confirm_login(func):
     return inner
 
 
-def csrf_protect(func):
-    @wraps(func)
-    def inner(*args, **kwargs):
-        if request.args.get('state') != web_session['state']:
-            response = make_response(json.dumps('Invalid state parameter.'), 401)
-            response.headers['Content-Type'] = 'application/json'
-            return response
-        return func(*args, **kwargs)
-    return inner
+def is_logged_in():
+    ''' check if a user is logged in
+        can be used to decide whether to
+        display certain features on front-end
+    '''
+    return 'logged_in' in web_session
 
 
-@app.route('/', methods=['GET'])
+@app.before_request(f)
+def check_state_token(*args, **kwargs):
+    ''' check a post request for a state token, protects against csrf attack '''
+    if request.method == 'POST':
+        state = web_session.pop('state', None)
+        if request.form.get('state', '') != state:
+            abort(403)
+    # TODO: what to return here?
+    return f(*args, **kwargs)
+
+
+def generate_state_token():
+    ''' generate a random state token,
+        to be used for every post request
+    '''
+    if 'state' not in web_session:
+        web_session['state'] = random_string()
+    return web_session['state']
+
+
+@app.route('/')
 def home():
     ''' this view will list all the categories and latest item
         once you log in, you can add items
@@ -54,7 +70,7 @@ def home():
     return render_template('home_page.html', latest=latest)
 
 
-@app.route('/catalog/<category>/items', methods=['GET'])
+@app.route('/catalog/<category>/items')
 def category_page(category):
     '''this view will show the items for a specific category '''
     if category not in categories:
@@ -63,16 +79,16 @@ def category_page(category):
     return render_template('category_page.html', category=category, items=items)
 
 
-@app.route('/catalog/<category>/<title>', methods=['GET'])
-def item_page(category, title):
+@app.route('/catalog/<category>/<title>/<int:item_id>')
+def item_page(category, title, item_id):
     '''this view will show an item in detail
         once you log in, you can edit item
     '''
-    if category not in categories:
-        return render_template('no_such.html', _object='category'), 400
     # TODO: what to do if multiple items have same name & same category
-    item = session.query(Item).filter_by(category=category, title=title).first()
+    # item = session.query(Item).filter_by(category=category, title=title).first()
+    item = session.query(Item).get(item_id)
     if not item:
+        flash('no such item')
         return render_template('no_such.html', _object='item'), 400
     editable = item.user_email == web_session.get('email', '')
     favorited = session.query(Like).filter_by(
@@ -106,15 +122,17 @@ def add_item():
     return redirect(url_for('home'))
 
 
-@app.route('/catalog/<title>/edit', methods=['POST', 'GET'])
+@app.route('/catalog/<title>/edit/<int:item_id>', methods=['POST', 'GET'])
 @confirm_login
-def edit_item(title):
+def edit_item(title, item_id):
     ''' this view will edit an item
         only if logged in
         only if you added the item
     '''
-    item = session.query(Item).filter_by(title=title).first()
+    # item = session.query(Item).filter_by(title=title).first()
+    item = session.query(Item).get(item_id)
     if not item:
+        flash('no such item')
         return render_template('no_such.html', _object='item'), 400
     if item.user_email != web_session['email']:
         flash('you can only edit your own items')
@@ -141,14 +159,15 @@ def edit_item(title):
     return redirect(url_for('home'))
 
 
-@app.route('/catalog/<title>/delete', methods=['POST'])
+@app.route('/catalog/<title>/delete/<int:item_id>', methods=['POST'])
 @confirm_login
-def delete_item(title):
+def delete_item(title, item_id):
     ''' this view will delete an item
         only if logged in
         only if you added the item
     '''
-    item = session.query(Item).filter_by(title=title).first()
+    # item = session.query(Item).filter_by(title=title).first()
+    item = session.query(Item).get(item_id)
     if not item:
         flash('no such item')
         return redirect(url_for('home'))
@@ -161,13 +180,11 @@ def delete_item(title):
     return redirect(url_for('home'))
 
 
-@app.route('/login', methods=['GET'])
+@app.route('/login')
 def login():
     '''this view will login the user'''
-    state = random_string()
-    web_session['state'] = state
     if request.method == 'GET':
-        return render_template('login.html', state=state)
+        return render_template('login.html')
 
 
 def gdisconnect():
@@ -190,15 +207,16 @@ def gdisconnect():
 
 
 @app.route('/fbconnect', methods=['POST'])
-@csrf_protect
 def fbconnect():
-    access_token = request.data
+    ''' connect to facebook via oauth api '''
+    access_token = request.form.get('data', '')
+    print(access_token)
     with open('fb_client_secrets.json', 'r') as f:
         client_secret = json.loads(f.read())
     app_id = client_secret['web']['app_id']
     app_secret = client_secret['web']['app_secret']
-    url = 'https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id=%s&client_secret=%s&fb_exchange_token=%s' % (
-        app_id, app_secret, access_token)
+    url = 'https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id=%s&client_secret=%s&fb_exchange_token=%s'
+    url = url % (app_id, app_secret, access_token)
     result = requests.get(url).content
     print(result)
     # strip expire tag from access token
@@ -231,6 +249,7 @@ def fbconnect():
 
 
 def fbdisconnect():
+    ''' logout of facebook sign in'''
     facebook_id = web_session['facebook_id']
     # The access token must me included to successfully logout
     access_token = web_session['access_token']
@@ -245,9 +264,10 @@ def fbdisconnect():
 
 
 @app.route('/gconnect', methods=['POST'])
-@csrf_protect
 def gconnect():
-    code = request.data
+    ''' login via google oauth api '''
+    code = request.form.get('data', '')
+    print(code)
     try:
         # Upgrade the authorization code into a credentials object
         oauth_flow = flow_from_clientsecrets('google_client_secrets.json', scope='')
@@ -347,13 +367,14 @@ def json_category(category):
 def json_item(category, title):
     '''this view returns an item description in json view'''
     item = session.query(Item).filter_by(
-            category=category, title=title).first()
+        category=category, title=title).first()
     if not item:
+        flash('no such item')
         return jsonify(item=None)
     return jsonify(item=item.serialize)
 
 
-@app.route('/profile', methods=['GET'])
+@app.route('/profile')
 @confirm_login
 def profile():
     ''' this view will list all the favorites for a user'''
@@ -385,8 +406,9 @@ def favorite(title):
         return jsonify(favorite='successful', like='liked')
 
 
-@app.route('/search', methods=['GET'])
+@app.route('/search')
 def search():
+    ''' this view returns the results of a search query from front end '''
     term = request.args.get('search')
     items = session.query(Item).filter(or_(
         Item.category.like('%{0}%'.format(term)),
@@ -396,6 +418,7 @@ def search():
 
 @app.errorhandler(404)
 def page_not_found(e):
+    ''' default 404 page '''
     return render_template('no_such.html', _object='Page'), 404
 
 
@@ -406,5 +429,6 @@ if __name__ == '__main__':
     app.secret_key = random_string(30)
     app.jinja_env.globals['categories'] = sorted(categories)
     app.jinja_env.globals['logged_in'] = is_logged_in
+    app.jinja_env.globals['state'] = generate_state_token
     params = dict(debug=True, host='localhost', port=8002)
     app.run(**params)

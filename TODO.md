@@ -1,5 +1,4 @@
 # steps
-+ find way to retrieve right items when viewing/editing/deleting (TODO)
 
 ## prettify
 + split into modules?
@@ -11,6 +10,8 @@
 + add github oauth
 
 # done
++ find way to retrieve right items when viewing/editing/deleting (TODO)
+    + add item id to item_page, edit_item, delete_item
 + setup database
 + layout routes
 + make sure each get/post skeletons are set up
@@ -24,6 +25,8 @@
 + flash messages
 + make images round
 + 404 page
++ add generate csrftoken again
+    + send csrf token to all views that post
 
 # log
 #### 2016-11-29 19:18:20.090064

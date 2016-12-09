@@ -45,9 +45,11 @@ function signInCallback(authResult) {
     // Send the one-time-use code to the server, if the server responds, write a 'login successful' message to the web page and then redirect back to the main restaurants page
     $.ajax({
       type: 'POST',
-      url: '/gconnect?state={{state}}',
+      url: '/gconnect',
       processData: false,
-      data: authResult['code'],
+      data: {"state": '{{state()}}',
+             "data": authResult['code'],
+            },
       contentType: 'application/octet-stream; charset=utf-8',
       success: function(result) {
         // Handle or verify the server response if necessary.
@@ -68,9 +70,9 @@ function signInCallback(authResult) {
       }
   }); } }
 </script>
-<!--END GOOGLE PLUS SIGN IN -->
-<!--FACEBOOK SIGN IN -->
+
 <script>
+//FACEBOOK SIGN IN
   window.fbAsyncInit = function() {
     FB.init({
       appId      : '1886659994902904',
@@ -104,9 +106,11 @@ function signInCallback(authResult) {
       console.log('Successful login for: ' + response.name);
      $.ajax({
       type: 'POST',
-      url: '/fbconnect?state={{state}}',
+      url: '/fbconnect',
       processData: false,
-      data: access_token,
+      data: {"state": '{{state()}}',
+             "data": access_token,
+            },
       contentType: 'application/octet-stream; charset=utf-8',
       success: function(result) {
         // Handle or verify the server response if necessary.
