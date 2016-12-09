@@ -1,0 +1,11 @@
+img {
+  height: 25%;
+  width: 25%;
+  border-radius: 100%;
+}
+.delete-btn, .favorite-btn {
+  color: red;
+}
+.flashes {
+  background: yellow;
+}
