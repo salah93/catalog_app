@@ -1,10 +1,14 @@
 # steps
++ add github oauth
++ add more json endpoints
 
 ## prettify
 + split into modules?
 + add css
 + go through guidelines
 + docstrings
++ comments
++ tests
 
 # done
 + setup database

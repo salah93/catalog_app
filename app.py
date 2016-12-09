@@ -21,6 +21,10 @@ from utility import random_string
 app = Flask(__name__)
 
 
+def is_logged_in():
+    return 'logged_in' in web_session
+
+
 def confirm_login(func):
     @wraps(func)
     def inner(*args, **kwargs):
@@ -30,8 +34,15 @@ def confirm_login(func):
     return inner
 
 
-def is_logged_in():
-    return 'logged_in' in web_session
+def csrf_protect(func):
+    @wraps(func)
+    def inner(*args, **kwargs):
+        if request.args.get('state') != web_session['state']:
+            response = make_response(json.dumps('Invalid state parameter.'), 401)
+            response.headers['Content-Type'] = 'application/json'
+            return response
+        return func(*args, **kwargs)
+    return inner
 
 
 @app.route('/', methods=['GET'])
@@ -179,13 +190,9 @@ def gdisconnect():
 
 
 @app.route('/fbconnect', methods=['POST'])
+@csrf_protect
 def fbconnect():
-    if request.args.get('state') != web_session['state']:
-        response = make_response(json.dumps('Invalid state parameter.'), 401)
-        response.headers['Content-Type'] = 'application/json'
-        return response
     access_token = request.data
-
     with open('fb_client_secrets.json', 'r') as f:
         client_secret = json.loads(f.read())
     app_id = client_secret['web']['app_id']
@@ -238,11 +245,8 @@ def fbdisconnect():
 
 
 @app.route('/gconnect', methods=['POST'])
+@csrf_protect
 def gconnect():
-    if request.args.get('state', '') != web_session.get('state'):
-        response = make_response(json.dumps('Invalid state parameter.'), 401)
-        response.headers['Content-Type'] = 'application/json'
-        return response
     code = request.data
     try:
         # Upgrade the authorization code into a credentials object
@@ -306,7 +310,6 @@ def gconnect():
         user = User(email=email, name=name, picture=picture)
         session.add(user)
         session.commit()
-    print(name)
     flash("you are now logged in as {0}".format(name))
     return name
 
