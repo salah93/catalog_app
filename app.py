@@ -42,7 +42,7 @@ def is_logged_in():
 
 
 @app.before_request
-def check_state_token(*args, **kwargs):
+def check_state_token():
     ''' check a post request for a state token, protects against csrf attack '''
     if request.method == 'POST':
         connect_methods = ['/gconnect', '/fbconnect', '/ghconnect']
@@ -88,7 +88,6 @@ def item_page(category, title, item_id):
     '''this view will show an item in detail
         once you log in, you can edit item
     '''
-    # TODO: what to do if multiple items have same name & same category
     # item = session.query(Item).filter_by(category=category, title=title).first()
     item = session.query(Item).get(item_id)
     if not item:
@@ -372,13 +371,11 @@ def json_category(category):
     return jsonify(items=[i.serialize for i in items])
 
 
-@app.route('/catalog/<category>/<title>/item.json')
-def json_item(category, title):
+@app.route('/catalog/<category>/<title>/<int:item_id>/item.json')
+def json_item(category, title, item_id):
     '''this view returns an item description in json view'''
-    item = session.query(Item).filter_by(
-        category=category, title=title).first()
+    item = session.query(Item).get(item_id)
     if not item:
-        flash('no such item')
         return jsonify(item=None)
     return jsonify(item=item.serialize)
 

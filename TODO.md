@@ -8,6 +8,7 @@
 + add github oauth
 
 # done
++ edit json to inlcude item_id
 + docstrings
 + go through guidelines
 + find way to retrieve right items when viewing/editing/deleting (TODO)
