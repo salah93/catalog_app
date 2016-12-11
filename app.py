@@ -45,7 +45,7 @@ def is_logged_in():
 def check_state_token():
     ''' check a post request for a state token, protects against csrf attack '''
     if request.method == 'POST':
-        connect_methods = ['/gconnect', '/fbconnect', '/ghconnect']
+        connect_methods = ['/gconnect', '/fbconnect']
         if request.path in connect_methods:
             data = request.data.decode('utf-8') 
             page_state = json.loads(data)['state']  
@@ -354,8 +354,6 @@ def logout():
             gdisconnect()
         elif 'facebook' in oauth_provider:
             fbdisconnect()
-        elif 'github' in oauth_provider:
-            ghdisconnect()
     return redirect(url_for('home'))
 
 
