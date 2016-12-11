@@ -190,8 +190,10 @@ def delete_item(title, item_id):
 @app.route('/login')
 def login():
     '''this view will login the user'''
-    if request.method == 'GET':
-        return render_template('login.html')
+    if is_logged_in():
+        flash('you are already logged in silly')
+        return redirect(url_for('home'))
+    return render_template('login.html')
 
 
 def gdisconnect():
