@@ -6,15 +6,15 @@ import json
 from functools import wraps
 
 import requests
-from flask import (Flask, abort, flash, jsonify, make_response,                   
-                   redirect, render_template, request, 
+from flask import (Flask, abort, flash, jsonify, make_response,
+                   redirect, render_template, request,
                    session as web_session, url_for)
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import or_
 
-from models import  Base, Item, Like, User, categories, engine 
+from models import  Base, Item, Like, User, categories, engine
 from utility import random_string
 
 
@@ -47,8 +47,8 @@ def check_state_token():
     if request.method == 'POST':
         connect_methods = ['/gconnect', '/fbconnect']
         if request.path in connect_methods:
-            data = request.data.decode('utf-8') 
-            page_state = json.loads(data)['state']  
+            data = request.data.decode('utf-8')
+            page_state = json.loads(data)['state']
         else:
             page_state = request.form.get('state')
         state = web_session.pop('state', None)
@@ -219,7 +219,7 @@ def gdisconnect():
 def fbconnect():
     ''' connect to facebook via oauth api '''
     # access_token = request.data
-    data = request.data.decode('utf-8') 
+    data = request.data.decode('utf-8')
     access_token = json.loads(data)['access_token']
     with open('fb_client_secrets.json', 'r') as f:
         client_secret = json.loads(f.read())
@@ -272,11 +272,19 @@ def fbdisconnect():
     return True
 
 
+@app.route('/ghconnect', methods=['POST'])
+def ghonnect():
+    ''' login via google oauth api '''
+    # code = request.data
+    data = request.data.decode('utf-8')
+    code = json.loads(data)['code']
+
+
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
     ''' login via google oauth api '''
     # code = request.data
-    data = request.data.decode('utf-8') 
+    data = request.data.decode('utf-8')
     code = json.loads(data)['code']
     try:
         # Upgrade the authorization code into a credentials object
