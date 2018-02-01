@@ -12,7 +12,7 @@ categories = ['football', 'american football', 'baseball', 'golf', 'rock climbin
 
 class User(Base):
     __tablename__ = 'user'
-    email = Column(String(250), nullable=False, primary_key=True)
+    email = Column(String(250), primary_key=True)
     picture = Column(String(250))
     name = Column(String(250), nullable=False)
 
@@ -32,7 +32,7 @@ class Item(Base):
     description = Column(Text, nullable=False)
     date_added = Column(DateTime, default=datetime.utcnow)
     picture = Column(String(250))
-    user_email = Column(Integer, ForeignKey('user.email'))
+    user_email = Column(String(250), ForeignKey('user.email'))
     user = relationship(User)
 
     @property
@@ -49,16 +49,17 @@ class Item(Base):
 class Like(Base):
     __tablename__ = 'like'
     # Notice that each column is also a normal Python instance attribute.
-    id = Column(Integer, primary_key=True)
+    d = Column(Integer, primary_key=True)
     item_id = Column(Integer, ForeignKey('item.id'))
     item = relationship(Item)
-    user_email = Column(Integer, ForeignKey('user.email'))
+    user_email = Column(String(250), ForeignKey('user.email'))
     user = relationship(User)
 
 
 # Create an engine that stores data in the local directory's
 # catalog_app.db file.
-engine = create_engine('sqlite:///catalog_app.db')
+# engine = create_engine('sqlite:///catalog_app.db')
+engine = create_engine('postgresql://catalog:wy5P3Pxvl6IbNPYlP1nP@localhost:5432/catalog')
 
 # Create all tables in the engine. This is equivalent to "Create Table"
 # statements in raw SQL.

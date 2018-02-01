@@ -3,3 +3,4 @@ sqlalchemy
 tox
 requests
 oauth2client
+psycopg2

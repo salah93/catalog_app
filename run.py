@@ -3,7 +3,10 @@ simple app demonstrating CRUD
 '''
 
 import json
+import logging
 from functools import wraps
+from logging.handlers import RotatingFileHandler
+from os.path import join, dirname
 
 import requests
 from flask import (Flask, abort, flash, jsonify, make_response,
@@ -14,11 +17,35 @@ from oauth2client.client import FlowExchangeError
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import or_
 
-from models import  Base, Item, Like, User, categories, engine
+from models import Base, Item, Like, User, categories, engine
 from utility import random_string
 
 
+def generate_state_token():
+    ''' generate a random state token,
+        to be used for every post request
+    '''
+    if 'state' not in web_session:
+        web_session['state'] = random_string()
+    return web_session['state']
+
+
+def is_logged_in():
+    ''' check if a user is logged in
+        can be used to decide whether to
+        display certain features on front-end
+    '''
+    return 'logged_in' in web_session
+
+
 app = Flask(__name__)
+log = join(dirname(__file__), 'error.log')
+Base.metadata.bind = engine
+dbsession = sessionmaker(bind=engine)
+session = dbsession()
+app.jinja_env.globals['categories'] = sorted(categories)
+app.jinja_env.globals['logged_in'] = is_logged_in
+app.jinja_env.globals['state'] = generate_state_token
 
 
 def confirm_login(func):
@@ -33,17 +60,12 @@ def confirm_login(func):
     return inner
 
 
-def is_logged_in():
-    ''' check if a user is logged in
-        can be used to decide whether to
-        display certain features on front-end
-    '''
-    return 'logged_in' in web_session
-
-
 @app.before_request
 def check_state_token():
-    ''' check a post request for a state token, protects against csrf attack '''
+    '''
+    check a post request for a state token,
+    protects against csrf attack
+    '''
     if request.method == 'POST':
         connect_methods = ['/gconnect', '/fbconnect']
         if request.path in connect_methods:
@@ -54,15 +76,6 @@ def check_state_token():
         state = web_session.pop('state', None)
         if not state or page_state != state:
             abort(403)
-
-
-def generate_state_token():
-    ''' generate a random state token,
-        to be used for every post request
-    '''
-    if 'state' not in web_session:
-        web_session['state'] = random_string()
-    return web_session['state']
 
 
 @app.route('/')
@@ -79,8 +92,12 @@ def category_page(category):
     '''this view will show the items for a specific category '''
     if category not in categories:
         return render_template('no_such.html', _object='category'), 400
-    items = session.query(Item).filter_by(category=category).order_by(Item.title)
-    return render_template('category_page.html', category=category, items=items)
+    items = session.query(Item).filter_by(
+        category=category).order_by(Item.title)
+    return render_template(
+        'category_page.html',
+        category=category,
+        items=items)
 
 
 @app.route('/catalog/<category>/<title>/<int:item_id>')
@@ -88,7 +105,6 @@ def item_page(category, title, item_id):
     '''this view will show an item in detail
         once you log in, you can edit item
     '''
-    # item = session.query(Item).filter_by(category=category, title=title).first()
     item = session.query(Item).get(item_id)
     if not item:
         flash('no such item')
@@ -109,7 +125,10 @@ def add_item():
         only if logged in
     '''
     if request.method == 'GET':
-        return render_template('item_form.html', url=request.path, header='Add an item')
+        return render_template(
+            'item_form.html',
+            url=request.path,
+            header='Add an item')
     category = request.form.get('category', '')
     description = request.form.get('description', '').strip()
     title = request.form.get('title', '').strip()
@@ -149,7 +168,9 @@ def edit_item(title, item_id):
     description = request.form.get('description', '').strip()
     new_title = request.form.get('title', '').strip()
     new_picture = request.form.get('picture', '').strip()
-    if not (category and new_title and description) or category not in categories:
+    if not (
+        category and new_title and description) or (
+            category not in categories):
         flash('edit failed')
         return redirect(url_for('home'))
     item.title = new_title
@@ -241,7 +262,8 @@ def fbconnect():
     data = requests.get(url).json()
     picture = data["data"]["url"]
     web_session['access_token'] = access_token
-    web_session['username'], web_session['picture'], web_session['email'] = name, picture, email
+    web_session['username'], web_session['picture'] = name, picture
+    web_session['email'] = email
     web_session['logged_in'], web_session['oauth_provider'] = True, 'facebook'
     # see if user exists
     user = session.query(User).get(email)
@@ -262,7 +284,8 @@ def fbdisconnect():
     facebook_id = web_session['facebook_id']
     # The access token must me included to successfully logout
     access_token = web_session['access_token']
-    url = 'https://graph.facebook.com/%s/permissions?access_token=%s' % (facebook_id, access_token)
+    url = 'https://graph.facebook.com/%s/permissions?access_token=%s' % (
+            facebook_id, access_token)
     requests.delete(url)
     web_session.pop('access_token', None)
     web_session.pop('facebook_id', None)
@@ -276,19 +299,23 @@ def fbdisconnect():
 def ghonnect():
     ''' login via google oauth api '''
     # code = request.data
-    data = request.data.decode('utf-8')
-    code = json.loads(data)['code']
+    # data = request.data.decode('utf-8')
+    # code = json.loads(data)['code']
+    pass
 
 
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
     ''' login via google oauth api '''
     # code = request.data
+    app.logger.info("connecting to google")
     data = request.data.decode('utf-8')
     code = json.loads(data)['code']
+    client_secret = join(dirname(__file__), 'google_client_secrets.json')
+    app.logger.info(client_secret)
     try:
         # Upgrade the authorization code into a credentials object
-        oauth_flow = flow_from_clientsecrets('google_client_secrets.json', scope='')
+        oauth_flow = flow_from_clientsecrets(client_secret, scope='')
         oauth_flow.redirect_uri = 'postmessage'
         credentials = oauth_flow.step2_exchange(code)
     except FlowExchangeError:
@@ -315,7 +342,7 @@ def gconnect():
         return response
 
     # Verify that the access token is valid for this app.
-    with open('google_client_secrets.json', 'r') as f:
+    with open(client_secret) as f:
         client_secret = json.loads(f.read())
     client_id = client_secret['web']['client_id']
     if result['issued_to'] != client_id:
@@ -327,8 +354,8 @@ def gconnect():
     stored_access_token = web_session.get('access_token')
     stored_gplus_id = web_session.get('gplus_id')
     if stored_access_token is not None and gplus_id == stored_gplus_id:
-        response = make_response(json.dumps('Current user is already connected.'),
-                                 200)
+        response = make_response(
+            json.dumps('Current user is already connected.'), 200)
         response.headers['Content-Type'] = 'application/json'
         return response
 
@@ -341,7 +368,8 @@ def gconnect():
     params = {'access_token': credentials.access_token, 'alt': 'json'}
     data = requests.get(userinfo_url, params=params).json()
     name, email, picture = data['name'], data['email'], data['picture']
-    web_session['username'], web_session['picture'], web_session['email'] = name, picture, email
+    web_session['username'], web_session['picture'] = name, picture
+    web_session['email'] = email
     web_session['logged_in'], web_session['oauth_provider'] = True, 'google'
     user = session.query(User).get(email)
     if not user:
@@ -395,7 +423,11 @@ def profile():
     user = session.query(User).get(web_session['email'])
     favorites = [l.item for l in session.query(Like).filter_by(user=user)]
     items = session.query(Item).filter_by(user=user)
-    return render_template('profile.html', favorites=favorites, items=items, **user.serialize)
+    return render_template(
+        'profile.html',
+        favorites=favorites,
+        items=items,
+        **user.serialize)
 
 
 @app.route('/catalog/favorite/<title>/<int:item_id>', methods=['POST'])
@@ -438,12 +470,9 @@ def page_not_found(e):
 
 
 if __name__ == '__main__':
-    Base.metadata.bind = engine
-    dbsession = sessionmaker(bind=engine)
-    session = dbsession()
     app.secret_key = random_string(30)
-    app.jinja_env.globals['categories'] = sorted(categories)
-    app.jinja_env.globals['logged_in'] = is_logged_in
-    app.jinja_env.globals['state'] = generate_state_token
-    params = dict(debug=True, host='localhost', port=8002)
+    handler = RotatingFileHandler('error.log', maxBytes=10000, backupCount=1)
+    handler.setLevel(logging.INFO)
+    app.logger.addHandler(handler)
+    params = dict(debug=True, host='0.0.0.0', port=5000)
     app.run(**params)
