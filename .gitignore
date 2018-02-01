@@ -3,3 +3,6 @@
 *ipynb
 .tox/
 *.json
+*swp
+*.log
+env/
