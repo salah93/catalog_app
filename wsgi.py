@@ -1,7 +1,6 @@
 import logging
 import site
 import sys
-from logging.handlers import RotatingFileHandler
 from os.path import join, dirname, expanduser
 
 # Add virtualenv site packages
@@ -20,7 +19,4 @@ from utility import random_string
 
 
 application.secret_key = random_string(30)
-
-handler = RotatingFileHandler(log, maxBytes=10000, backupCount=1)
-handler.setLevel(logging.INFO)
-application.logger.addHandler(handler)
+logging.basicConfig(filename=log,level=logging.DEBUG)
